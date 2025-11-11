@@ -12,10 +12,53 @@ body {
     min-height: 100vh;
 }
 
+/* PWA Safe Area Handling */
 .container {
     max-width: 1000px;
     margin: 0 auto;
     padding: 20px;
+    padding-top: calc(20px + env(safe-area-inset-top));
+    padding-bottom: calc(20px + env(safe-area-inset-bottom));
+    padding-left: calc(20px + env(safe-area-inset-left));
+    padding-right: calc(20px + env(safe-area-inset-right));
+}
+
+/* Improved touch interactions */
+button, .task-item, .time-slot {
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+}
+
+/* Prevent text selection on interactive elements */
+button, .task-item {
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+
+/* Allow text selection on inputs */
+input, textarea, select {
+    -webkit-user-select: text;
+    -moz-user-select: text;
+    -ms-user-select: text;
+    user-select: text;
+}
+
+/* Standalone app specific styles */
+@media all and (display-mode: standalone) {
+    body {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+        height: 100vh;
+        overflow: hidden;
+    }
+    
+    .container {
+        height: 100%;
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+    }
 }
 
 header {
@@ -75,10 +118,10 @@ header p {
 }
 
 .task-form input, .task-form select {
-    padding: 10px;
+    padding: 12px;
     border: 2px solid #e1e5e9;
     border-radius: 5px;
-    font-size: 14px;
+    font-size: 16px; /* Better for mobile */
 }
 
 .task-form input:focus, .task-form select:focus {
@@ -90,10 +133,10 @@ header p {
     background: #667eea;
     color: white;
     border: none;
-    padding: 10px 20px;
+    padding: 12px 20px;
     border-radius: 5px;
     cursor: pointer;
-    font-size: 14px;
+    font-size: 16px;
 }
 
 #add-task-btn:hover {
@@ -114,6 +157,7 @@ header p {
     padding: 15px;
     border-bottom: 1px solid #eee;
     transition: background-color 0.2s;
+    min-height: 70px;
 }
 
 .time-slot:hover {
@@ -129,7 +173,7 @@ header p {
 .task-item {
     flex: 1;
     background: #f8f9fa;
-    padding: 10px 15px;
+    padding: 12px 15px;
     margin-left: 20px;
     border-radius: 5px;
     border-left: 4px solid #667eea;
@@ -147,16 +191,18 @@ header p {
     background: none;
     border: none;
     cursor: pointer;
-    font-size: 14px;
-    padding: 5px;
+    font-size: 16px;
+    padding: 8px;
+    border-radius: 50%;
+    transition: background-color 0.2s;
 }
 
-.btn-edit {
-    color: #667eea;
+.btn-edit:hover {
+    background: #e9ecef;
 }
 
-.btn-delete {
-    color: #ff6b6b;
+.btn-delete:hover {
+    background: #ffe6e6;
 }
 
 .stats {
@@ -193,6 +239,102 @@ footer {
     opacity: 0.8;
 }
 
+/* PWA Specific Styles */
+#app-loading {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+    color: white;
+    font-size: 1.5rem;
+    transition: opacity 0.5s ease;
+}
+
+.hidden {
+    display: none !important;
+}
+
+.install-prompt {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: white;
+    padding: 20px;
+    border-radius: 15px;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+    z-index: 1000;
+    max-width: 320px;
+    width: 90%;
+}
+
+.install-content {
+    text-align: center;
+}
+
+.install-content p {
+    margin-bottom: 15px;
+    font-weight: 500;
+}
+
+.install-content button {
+    margin: 5px;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+#install-btn {
+    background: #667eea;
+    color: white;
+}
+
+#cancel-install {
+    background: #f8f9fa;
+    color: #666;
+}
+
+/* Toast notifications */
+.toast {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: #4CAF50;
+    color: white;
+    padding: 12px 20px;
+    border-radius: 8px;
+    z-index: 10000;
+    animation: slideIn 0.3s ease;
+    max-width: 300px;
+}
+
+.toast-warning {
+    background: #FF9800;
+}
+
+.toast-info {
+    background: #2196F3;
+}
+
+@keyframes slideIn {
+    from { transform: translateX(100%); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+}
+
+@keyframes slideOut {
+    from { transform: translateX(0); opacity: 1; }
+    to { transform: translateX(100%); opacity: 0; }
+}
+
 /* Responsive Design */
 @media (max-width: 768px) {
     .task-form {
@@ -207,5 +349,26 @@ footer {
         flex-direction: column;
         gap: 15px;
         text-align: center;
+    }
+    
+    header h1 {
+        font-size: 2rem;
+    }
+    
+    .time-slot {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+    
+    .task-item {
+        margin-left: 0;
+        width: 100%;
+    }
+    
+    .container {
+        padding: 15px;
+        padding-top: calc(15px + env(safe-area-inset-top));
+        padding-bottom: calc(15px + env(safe-area-inset-bottom));
     }
 }
