@@ -21,8 +21,32 @@ function initializeApp() {
         if (e.key === 'Enter') addTask();
     });
     
+    // Mobile-friendly touch improvements
+    setupTouchInteractions();
+    
     // Update statistics
     updateStatistics();
+}
+
+function setupTouchInteractions() {
+    // Better touch feedback for all interactive elements
+    const interactiveElements = document.querySelectorAll('button, .task-item, .time-slot');
+    interactiveElements.forEach(element => {
+        element.addEventListener('touchstart', function() {
+            this.style.transform = 'scale(0.98)';
+        });
+        
+        element.addEventListener('touchend', function() {
+            this.style.transform = 'scale(1)';
+        });
+    });
+    
+    // Close keyboard when tapping outside inputs
+    document.addEventListener('touchstart', function(e) {
+        if (!e.target.matches('input, select, textarea')) {
+            document.activeElement.blur();
+        }
+    });
 }
 
 function getCurrentDate() {
@@ -81,7 +105,7 @@ function addTask() {
     const duration = parseInt(durationSelect.value);
     
     if (!taskText || !selectedTime) {
-        alert('Please enter a task and select a time!');
+        showToast('Please enter a task and select a time!', 'warning');
         return;
     }
     
@@ -90,7 +114,8 @@ function addTask() {
         text: taskText,
         time: parseInt(selectedTime),
         duration: duration,
-        completed: false
+        completed: false,
+        created: new Date().toISOString()
     };
     
     saveTask(task);
@@ -101,6 +126,14 @@ function addTask() {
     taskInput.value = '';
     timeSelect.value = '';
     taskInput.focus();
+    
+    // Show success feedback
+    showToast('Task added successfully!', 'success');
+    
+    // Trigger haptic feedback if available
+    if (navigator.vibrate) {
+        navigator.vibrate(50);
+    }
 }
 
 function displayTask(task) {
@@ -111,10 +144,11 @@ function displayTask(task) {
     taskElement.dataset.taskId = task.id;
     
     taskElement.innerHTML = `
-        <span>${task.text} (${task.duration} min)</span>
+        <span class="task-text">${task.text}</span>
+        <span class="task-duration">${task.duration} min</span>
         <div class="task-actions">
-            <button class="btn-edit" onclick="editTask(${task.id})">✏️</button>
-            <button class="btn-delete" onclick="deleteTask(${task.id})">🗑️</button>
+            <button class="btn-edit" onclick="editTask(${task.id})" title="Edit task">✏️</button>
+            <button class="btn-delete" onclick="deleteTask(${task.id})" title="Delete task">🗑️</button>
         </div>
     `;
     
@@ -147,6 +181,12 @@ function deleteTask(taskId) {
         }
         
         updateStatistics();
+        showToast('Task deleted', 'info');
+        
+        // Haptic feedback
+        if (navigator.vibrate) {
+            navigator.vibrate(100);
+        }
     }
 }
 
@@ -165,6 +205,8 @@ function editTask(taskId) {
             generateTimeSlots();
             loadTasks();
             updateStatistics();
+            
+            showToast('Task updated!', 'success');
         }
     }
 }
@@ -175,6 +217,7 @@ function clearAllTasks() {
         document.querySelector('.time-slots').innerHTML = '';
         generateTimeSlots();
         updateStatistics();
+        showToast('All tasks cleared', 'info');
     }
 }
 
@@ -182,9 +225,55 @@ function updateStatistics() {
     const tasks = getSavedTasks();
     const totalTasks = tasks.length;
     const totalHours = tasks.reduce((sum, task) => sum + (task.duration / 60), 0);
-    const productivityScore = Math.min(100, Math.round((totalTasks / 8) * 100)); // Max 8 tasks for 100%
+    const productivityScore = Math.min(100, Math.round((totalTasks / 8) * 100));
     
     document.getElementById('total-tasks').textContent = totalTasks;
     document.getElementById('total-hours').textContent = totalHours.toFixed(1);
     document.getElementById('productivity-score').textContent = `${productivityScore}%`;
 }
+
+// Utility function to show toast notifications
+function showToast(message, type = 'info') {
+    // Remove existing toasts
+    const existingToasts = document.querySelectorAll('.toast');
+    existingToasts.forEach(toast => toast.remove());
+    
+    // Create new toast
+    const toast = document.createElement('div');
+    toast.className = `toast toast-${type}`;
+    toast.textContent = message;
+    
+    document.body.appendChild(toast);
+    
+    // Remove toast after 3 seconds
+    setTimeout(() => {
+        toast.style.animation = 'slideOut 0.3s ease';
+        setTimeout(() => {
+            if (toast.parentNode) {
+                toast.parentNode.removeChild(toast);
+            }
+        }, 300);
+    }, 3000);
+}
+
+// Handle online/offline status
+window.addEventListener('online', () => {
+    showToast('Connection restored', 'success');
+});
+
+window.addEventListener('offline', () => {
+    showToast('You are currently offline', 'warning');
+});
+
+// Hide loading screen when everything is loaded
+window.addEventListener('load', () => {
+    setTimeout(() => {
+        const loadingScreen = document.getElementById('app-loading');
+        if (loadingScreen) {
+            loadingScreen.style.opacity = '0';
+            setTimeout(() => {
+                loadingScreen.classList.add('hidden');
+            }, 500);
+        }
+    }, 1000);
+});
