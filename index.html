@@ -5,23 +5,25 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Daily Schedule Planner - Build Better Discipline</title>
     <link rel="stylesheet" href="style.css">
-    <!-- Add these lines to your existing head section -->
-<link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#667eea">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="default">
-<link rel="apple-touch-icon" href="icon-192.png">
-
-<!-- Service Worker Registration -->
-<script>
-if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('/sw.js')
-    .then(() => console.log('Service Worker Registered'))
-    .catch(err => console.log('Service Worker registration failed: ', err));
-}
-</script>
+    
+    <!-- === PWA META TAGS === -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#667eea">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="Schedule Planner">
+    <link rel="apple-touch-icon" href="icons/icon-192.png">
+    <meta name="msapplication-TileColor" content="#667eea">
+    <meta name="msapplication-TileImage" content="icons/icon-144.png">
+    <meta name="format-detection" content="telephone=no">
+    <meta name="mobile-web-app-capable" content="yes">
 </head>
 <body>
+    <!-- Loading Screen -->
+    <div id="app-loading">
+        <div>Loading Schedule Planner...</div>
+    </div>
+
     <div class="container">
         <header>
             <h1>📅 Daily Schedule Planner</h1>
@@ -75,10 +77,20 @@ if ('serviceWorker' in navigator) {
         </div>
     </div>
 
+    <!-- Install Prompt -->
+    <div id="install-prompt" class="install-prompt hidden">
+        <div class="install-content">
+            <p>📱 Install App for better experience?</p>
+            <button id="install-btn">Install</button>
+            <button id="cancel-install">Not Now</button>
+        </div>
+    </div>
+
     <footer>
         <p>Plan your day, shape your life. Stay disciplined! 💪</p>
     </footer>
 
     <script src="script.js"></script>
+    <script src="pwa.js"></script>
 </body>
 </html>
