@@ -1,29 +1,93 @@
-// Main App functionality
+// Initialize the schedule planner
+document.addEventListener('DOMContentLoaded', function() {
+    initializeApp();
+});
+
 function initializeApp() {
-    console.log('Initializing main app...');
+    // Initialize theme
+    initializeTheme();
     
     // Set current date
     document.getElementById('current-date').textContent = getCurrentDate();
     
-    // Generate time slots
+    // Generate time slots (6 AM to 10 PM)
     generateTimeSlots();
     populateTimeSelect();
     
-    // Load tasks
+    // Load saved tasks
     loadTasks();
     
-    // Setup event listeners
-    setupEventListeners();
+    // Event listeners
+    document.getElementById('add-task-btn').addEventListener('click', addTask);
+    document.getElementById('clear-all').addEventListener('click', clearAllTasks);
+    document.getElementById('task-input').addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') addTask();
+    });
+    
+    // Theme toggle
+    document.getElementById('theme-toggle').addEventListener('click', toggleTheme);
+    
+    // Mobile-friendly touch improvements
+    setupTouchInteractions();
     
     // Update statistics
     updateStatistics();
 }
 
-function setupEventListeners() {
-    document.getElementById('add-task-btn').addEventListener('click', addTask);
-    document.getElementById('clear-all').addEventListener('click', clearAllTasks);
-    document.getElementById('task-input').addEventListener('keypress', function(e) {
-        if (e.key === 'Enter') addTask();
+// Theme Management
+function initializeTheme() {
+    const savedTheme = localStorage.getItem('theme') || 'dark';
+    setTheme(savedTheme);
+}
+
+function setTheme(theme) {
+    document.documentElement.setAttribute('data-theme', theme);
+    localStorage.setItem('theme', theme);
+    
+    // Update theme toggle icon
+    const themeIcon = document.querySelector('.theme-icon');
+    if (themeIcon) {
+        themeIcon.textContent = theme === 'dark' ? '🌞' : '🌙';
+    }
+    
+    // Update manifest theme color
+    updateThemeColor(theme);
+}
+
+function toggleTheme() {
+    const currentTheme = document.documentElement.getAttribute('data-theme') || 'dark';
+    const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+    setTheme(newTheme);
+    
+    showToast(`Switched to ${newTheme} theme`, 'info');
+}
+
+function updateThemeColor(theme) {
+    const themeColor = theme === 'dark' ? '#0f172a' : '#ffffff';
+    const metaThemeColor = document.querySelector('meta[name="theme-color"]');
+    if (metaThemeColor) {
+        metaThemeColor.setAttribute('content', themeColor);
+    }
+}
+
+function setupTouchInteractions() {
+    // Better touch feedback for all interactive elements
+    const interactiveElements = document.querySelectorAll('button, .task-item, .time-slot');
+    interactiveElements.forEach(element => {
+        element.addEventListener('touchstart', function() {
+            this.style.transform = 'scale(0.98)';
+        });
+        
+        element.addEventListener('touchend', function() {
+            this.style.transform = 'scale(1)';
+        });
+    });
+    
+    // Close keyboard when tapping outside inputs
+    document.addEventListener('touchstart', function(e) {
+        if (!e.target.matches('input, select, textarea')) {
+            document.activeElement.blur();
+        }
     });
 }
 
@@ -34,11 +98,6 @@ function getCurrentDate() {
 
 function generateTimeSlots() {
     const timeSlotsContainer = document.querySelector('.time-slots');
-    if (!timeSlotsContainer) {
-        console.error('Time slots container not found!');
-        return;
-    }
-    
     timeSlotsContainer.innerHTML = '';
     
     for (let hour = 6; hour <= 22; hour++) {
@@ -62,11 +121,6 @@ function generateTimeSlots() {
 
 function populateTimeSelect() {
     const timeSelect = document.getElementById('time-select');
-    if (!timeSelect) {
-        console.error('Time select not found!');
-        return;
-    }
-    
     timeSelect.innerHTML = '<option value="">Select Time</option>';
     
     for (let hour = 6; hour <= 22; hour++) {
@@ -93,7 +147,7 @@ function addTask() {
     const duration = parseInt(durationSelect.value);
     
     if (!taskText || !selectedTime) {
-        alert('Please enter a task and select a time!');
+        showToast('Please enter a task and select a time!', 'warning');
         return;
     }
     
@@ -114,14 +168,18 @@ function addTask() {
     taskInput.value = '';
     timeSelect.value = '';
     taskInput.focus();
+    
+    // Show success feedback
+    showToast('Task added successfully!', 'success');
+    
+    // Trigger haptic feedback if available
+    if (navigator.vibrate) {
+        navigator.vibrate(50);
+    }
 }
 
 function displayTask(task) {
     const taskContainer = document.getElementById(`task-${task.time}`);
-    if (!taskContainer) {
-        console.error(`Task container for hour ${task.time} not found!`);
-        return;
-    }
     
     const taskElement = document.createElement('div');
     taskElement.className = 'task-item';
@@ -131,8 +189,8 @@ function displayTask(task) {
         <span class="task-text">${task.text}</span>
         <span class="task-duration">${task.duration} min</span>
         <div class="task-actions">
-            <button class="btn-edit" onclick="editTask(${task.id})">✏️</button>
-            <button class="btn-delete" onclick="deleteTask(${task.id})">🗑️</button>
+            <button class="btn-edit" onclick="editTask(${task.id})" title="Edit task">✏️</button>
+            <button class="btn-delete" onclick="deleteTask(${task.id})" title="Delete task">🗑️</button>
         </div>
     `;
     
@@ -165,6 +223,12 @@ function deleteTask(taskId) {
         }
         
         updateStatistics();
+        showToast('Task deleted', 'info');
+        
+        // Haptic feedback
+        if (navigator.vibrate) {
+            navigator.vibrate(100);
+        }
     }
 }
 
@@ -183,16 +247,19 @@ function editTask(taskId) {
             generateTimeSlots();
             loadTasks();
             updateStatistics();
+            
+            showToast('Task updated!', 'success');
         }
     }
 }
 
 function clearAllTasks() {
-    if (confirm('Are you sure you want to clear all tasks?')) {
+    if (confirm('Are you sure you want to clear all tasks? This cannot be undone.')) {
         localStorage.removeItem('dailySchedule');
         document.querySelector('.time-slots').innerHTML = '';
         generateTimeSlots();
         updateStatistics();
+        showToast('All tasks cleared', 'info');
     }
 }
 
@@ -206,3 +273,49 @@ function updateStatistics() {
     document.getElementById('total-hours').textContent = totalHours.toFixed(1);
     document.getElementById('productivity-score').textContent = `${productivityScore}%`;
 }
+
+// Utility function to show toast notifications
+function showToast(message, type = 'info') {
+    // Remove existing toasts
+    const existingToasts = document.querySelectorAll('.toast');
+    existingToasts.forEach(toast => toast.remove());
+    
+    // Create new toast
+    const toast = document.createElement('div');
+    toast.className = `toast toast-${type}`;
+    toast.textContent = message;
+    
+    document.body.appendChild(toast);
+    
+    // Remove toast after 3 seconds
+    setTimeout(() => {
+        toast.style.animation = 'slideOut 0.3s ease';
+        setTimeout(() => {
+            if (toast.parentNode) {
+                toast.parentNode.removeChild(toast);
+            }
+        }, 300);
+    }, 3000);
+}
+
+// Handle online/offline status
+window.addEventListener('online', () => {
+    showToast('Connection restored', 'success');
+});
+
+window.addEventListener('offline', () => {
+    showToast('You are currently offline', 'warning');
+});
+
+// Hide loading screen when everything is loaded
+window.addEventListener('load', () => {
+    setTimeout(() => {
+        const loadingScreen = document.getElementById('app-loading');
+        if (loadingScreen) {
+            loadingScreen.style.opacity = '0';
+            setTimeout(() => {
+                loadingScreen.classList.add('hidden');
+            }, 500);
+        }
+    }, 1000);
+});
