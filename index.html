@@ -3,31 +3,43 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Daily Schedule Planner - Build Better Discipline</title>
+    <title>Dark Schedule Planner - Build Better Discipline</title>
     <link rel="stylesheet" href="style.css">
     
     <!-- === PWA META TAGS === -->
     <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#667eea">
+    <meta name="theme-color" content="#0f172a">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Schedule Planner">
     <link rel="apple-touch-icon" href="icons/icon-192.png">
-    <meta name="msapplication-TileColor" content="#667eea">
+    <meta name="msapplication-TileColor" content="#0f172a">
     <meta name="msapplication-TileImage" content="icons/icon-144.png">
     <meta name="format-detection" content="telephone=no">
     <meta name="mobile-web-app-capable" content="yes">
+    
+    <!-- Dark mode meta tags -->
+    <meta name="color-scheme" content="dark">
+    <meta name="supported-color-schemes" content="dark">
 </head>
 <body>
     <!-- Loading Screen -->
     <div id="app-loading">
-        <div>Loading Schedule Planner...</div>
+        <div class="loading-content">
+            <div class="loading-spinner"></div>
+            <p>Loading Dark Schedule Planner...</p>
+        </div>
     </div>
 
     <div class="container">
         <header>
-            <h1>📅 Daily Schedule Planner</h1>
-            <p>Plan your day, build discipline, achieve your goals</p>
+            <div class="header-content">
+                <h1>🌙 Dark Schedule Planner</h1>
+                <p>Plan your day, build discipline, achieve your goals</p>
+                <button id="theme-toggle" class="theme-toggle" title="Toggle theme">
+                    <span class="theme-icon">🌞</span>
+                </button>
+            </div>
         </header>
 
         <div class="date-section">
@@ -49,7 +61,7 @@
                     <option value="90">1.5 hours</option>
                     <option value="120">2 hours</option>
                 </select>
-                <button id="add-task-btn">Add Task</button>
+                <button id="add-task-btn" class="btn-primary">Add Task</button>
             </div>
         </div>
 
@@ -63,15 +75,18 @@
         <!-- Statistics -->
         <div class="stats">
             <div class="stat-card">
+                <div class="stat-icon">📊</div>
                 <h3>Tasks Planned</h3>
                 <span id="total-tasks">0</span>
             </div>
             <div class="stat-card">
+                <div class="stat-icon">⏱️</div>
                 <h3>Hours Scheduled</h3>
                 <span id="total-hours">0</span>
             </div>
             <div class="stat-card">
-                <h3>Productivity Score</h3>
+                <div class="stat-icon">🚀</div>
+                <h3>Productivity</h3>
                 <span id="productivity-score">0%</span>
             </div>
         </div>
@@ -80,9 +95,11 @@
     <!-- Install Prompt -->
     <div id="install-prompt" class="install-prompt hidden">
         <div class="install-content">
-            <p>📱 Install App for better experience?</p>
-            <button id="install-btn">Install</button>
-            <button id="cancel-install">Not Now</button>
+            <p>📱 Install Dark Schedule Planner?</p>
+            <div class="install-buttons">
+                <button id="install-btn" class="btn-primary">Install</button>
+                <button id="cancel-install" class="btn-secondary">Not Now</button>
+            </div>
         </div>
     </div>
 
