@@ -1,89 +1,29 @@
-// Initialize the schedule planner
+// Main App functionality
 function initializeApp() {
-    // Initialize theme
-    initializeTheme();
+    console.log('Initializing main app...');
     
     // Set current date
     document.getElementById('current-date').textContent = getCurrentDate();
     
-    // Generate time slots (6 AM to 10 PM)
+    // Generate time slots
     generateTimeSlots();
     populateTimeSelect();
     
-    // Load saved tasks (from user's account)
+    // Load tasks
     loadTasks();
     
-    // Event listeners
-    document.getElementById('add-task-btn').addEventListener('click', addTask);
-    document.getElementById('clear-all').addEventListener('click', clearAllTasks);
-    document.getElementById('task-input').addEventListener('keypress', function(e) {
-        if (e.key === 'Enter') addTask();
-    });
-    
-    // Theme toggle
-    document.getElementById('theme-toggle').addEventListener('click', toggleTheme);
-    
-    // Mobile-friendly touch improvements
-    setupTouchInteractions();
+    // Setup event listeners
+    setupEventListeners();
     
     // Update statistics
     updateStatistics();
 }
 
-// Theme Management
-function initializeTheme() {
-    const savedTheme = localStorage.getItem('theme') || 'dark';
-    setTheme(savedTheme);
-}
-
-function setTheme(theme) {
-    document.documentElement.setAttribute('data-theme', theme);
-    localStorage.setItem('theme', theme);
-    
-    // Update theme toggle icon
-    const themeIcon = document.querySelector('.theme-icon');
-    if (themeIcon) {
-        themeIcon.textContent = theme === 'dark' ? '🌞' : '🌙';
-    }
-    
-    // Update manifest theme color
-    updateThemeColor(theme);
-}
-
-function toggleTheme() {
-    const currentTheme = document.documentElement.getAttribute('data-theme') || 'dark';
-    const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
-    setTheme(newTheme);
-    
-    showToast(`Switched to ${newTheme} theme`, 'info');
-}
-
-function updateThemeColor(theme) {
-    const themeColor = theme === 'dark' ? '#0f172a' : '#ffffff';
-    const metaThemeColor = document.querySelector('meta[name="theme-color"]');
-    if (metaThemeColor) {
-        metaThemeColor.setAttribute('content', themeColor);
-    }
-}
-
-function setupTouchInteractions() {
-    // Better touch feedback for all interactive elements
-    const interactiveElements = document.querySelectorAll('button, .task-item, .time-slot');
-    interactiveElements.forEach(element => {
-        element.addEventListener('touchstart', function() {
-            this.style.transform = 'scale(0.98)';
-        });
-        
-        element.addEventListener('touchend', function() {
-            this.style.transform = 'scale(1)';
-        });
-    });
-    
-    // Close keyboard when tapping outside inputs
-    document.addEventListener('touchstart', function(e) {
-        if (!e.target.matches('input, select, textarea')) {
-            document.activeElement.blur();
-        }
+function setupEventListeners() {
+    document.getElementById('add-task-btn').addEventListener('click', addTask);
+    document.getElementById('clear-all').addEventListener('click', clearAllTasks);
+    document.getElementById('task-input').addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') addTask();
     });
 }
 
@@ -94,6 +34,11 @@ function getCurrentDate() {
 
 function generateTimeSlots() {
     const timeSlotsContainer = document.querySelector('.time-slots');
+    if (!timeSlotsContainer) {
+        console.error('Time slots container not found!');
+        return;
+    }
+    
     timeSlotsContainer.innerHTML = '';
     
     for (let hour = 6; hour <= 22; hour++) {
@@ -117,6 +62,11 @@ function generateTimeSlots() {
 
 function populateTimeSelect() {
     const timeSelect = document.getElementById('time-select');
+    if (!timeSelect) {
+        console.error('Time select not found!');
+        return;
+    }
+    
     timeSelect.innerHTML = '<option value="">Select Time</option>';
     
     for (let hour = 6; hour <= 22; hour++) {
@@ -143,7 +93,7 @@ function addTask() {
     const duration = parseInt(durationSelect.value);
     
     if (!taskText || !selectedTime) {
-        showToast('Please enter a task and select a time!', 'warning');
+        alert('Please enter a task and select a time!');
         return;
     }
     
@@ -164,18 +114,14 @@ function addTask() {
     taskInput.value = '';
     timeSelect.value = '';
     taskInput.focus();
-    
-    // Show success feedback
-    showToast('Task added successfully!', 'success');
-    
-    // Trigger haptic feedback if available
-    if (navigator.vibrate) {
-        navigator.vibrate(50);
-    }
 }
 
 function displayTask(task) {
     const taskContainer = document.getElementById(`task-${task.time}`);
+    if (!taskContainer) {
+        console.error(`Task container for hour ${task.time} not found!`);
+        return;
+    }
     
     const taskElement = document.createElement('div');
     taskElement.className = 'task-item';
@@ -185,8 +131,8 @@ function displayTask(task) {
         <span class="task-text">${task.text}</span>
         <span class="task-duration">${task.duration} min</span>
         <div class="task-actions">
-            <button class="btn-edit" onclick="editTask(${task.id})" title="Edit task">✏️</button>
-            <button class="btn-delete" onclick="deleteTask(${task.id})" title="Delete task">🗑️</button>
+            <button class="btn-edit" onclick="editTask(${task.id})">✏️</button>
+            <button class="btn-delete" onclick="deleteTask(${task.id})">🗑️</button>
         </div>
     `;
     
@@ -194,28 +140,13 @@ function displayTask(task) {
 }
 
 function saveTask(task) {
-    if (!window.authSystem || !window.authSystem.currentUser) {
-        // Fallback to localStorage if auth system not available
-        const tasks = getSavedTasks();
-        tasks.push(task);
-        localStorage.setItem('dailySchedule', JSON.stringify(tasks));
-        return;
-    }
-    
-    // Use auth system to save task
-    const currentTasks = window.authSystem.getCurrentUserTasks();
-    currentTasks.push(task);
-    window.authSystem.saveCurrentUserTasks(currentTasks);
+    const tasks = getSavedTasks();
+    tasks.push(task);
+    localStorage.setItem('dailySchedule', JSON.stringify(tasks));
 }
 
 function getSavedTasks() {
-    if (!window.authSystem || !window.authSystem.currentUser) {
-        // Fallback to localStorage if auth system not available
-        return JSON.parse(localStorage.getItem('dailySchedule')) || [];
-    }
-    
-    // Use auth system to get tasks
-    return window.authSystem.getCurrentUserTasks();
+    return JSON.parse(localStorage.getItem('dailySchedule')) || [];
 }
 
 function loadTasks() {
@@ -225,16 +156,8 @@ function loadTasks() {
 
 function deleteTask(taskId) {
     if (confirm('Are you sure you want to delete this task?')) {
-        if (!window.authSystem || !window.authSystem.currentUser) {
-            // Fallback to localStorage if auth system not available
-            const tasks = getSavedTasks().filter(task => task.id !== taskId);
-            localStorage.setItem('dailySchedule', JSON.stringify(tasks));
-        } else {
-            // Use auth system to delete task
-            const currentTasks = window.authSystem.getCurrentUserTasks();
-            const updatedTasks = currentTasks.filter(task => task.id !== taskId);
-            window.authSystem.saveCurrentUserTasks(updatedTasks);
-        }
+        const tasks = getSavedTasks().filter(task => task.id !== taskId);
+        localStorage.setItem('dailySchedule', JSON.stringify(tasks));
         
         const taskElement = document.querySelector(`[data-task-id="${taskId}"]`);
         if (taskElement) {
@@ -242,26 +165,44 @@ function deleteTask(taskId) {
         }
         
         updateStatistics();
-        showToast('Task deleted', 'info');
-        
-        // Haptic feedback
-        if (navigator.vibrate) {
-            navigator.vibrate(100);
-        }
     }
 }
 
 function editTask(taskId) {
-    let tasks;
-    if (!window.authSystem || !window.authSystem.currentUser) {
-        tasks = getSavedTasks();
-    } else {
-        tasks = window.authSystem.getCurrentUserTasks();
-    }
-    
+    const tasks = getSavedTasks();
     const task = tasks.find(t => t.id === taskId);
     
     if (task) {
         const newText = prompt('Edit your task:', task.text);
         if (newText !== null && newText.trim() !== '') {
-           
+            task.text = newText.trim();
+            localStorage.setItem('dailySchedule', JSON.stringify(tasks));
+            
+            // Refresh display
+            document.querySelector('.time-slots').innerHTML = '';
+            generateTimeSlots();
+            loadTasks();
+            updateStatistics();
+        }
+    }
+}
+
+function clearAllTasks() {
+    if (confirm('Are you sure you want to clear all tasks?')) {
+        localStorage.removeItem('dailySchedule');
+        document.querySelector('.time-slots').innerHTML = '';
+        generateTimeSlots();
+        updateStatistics();
+    }
+}
+
+function updateStatistics() {
+    const tasks = getSavedTasks();
+    const totalTasks = tasks.length;
+    const totalHours = tasks.reduce((sum, task) => sum + (task.duration / 60), 0);
+    const productivityScore = Math.min(100, Math.round((totalTasks / 8) * 100));
+    
+    document.getElementById('total-tasks').textContent = totalTasks;
+    document.getElementById('total-hours').textContent = totalHours.toFixed(1);
+    document.getElementById('productivity-score').textContent = `${productivityScore}%`;
+}
