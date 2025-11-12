@@ -1,8 +1,4 @@
 // Initialize the schedule planner
-document.addEventListener('DOMContentLoaded', function() {
-    initializeApp();
-});
-
 function initializeApp() {
     // Initialize theme
     initializeTheme();
@@ -14,7 +10,7 @@ function initializeApp() {
     generateTimeSlots();
     populateTimeSelect();
     
-    // Load saved tasks
+    // Load saved tasks (from user's account)
     loadTasks();
     
     // Event listeners
@@ -198,13 +194,28 @@ function displayTask(task) {
 }
 
 function saveTask(task) {
-    const tasks = getSavedTasks();
-    tasks.push(task);
-    localStorage.setItem('dailySchedule', JSON.stringify(tasks));
+    if (!window.authSystem || !window.authSystem.currentUser) {
+        // Fallback to localStorage if auth system not available
+        const tasks = getSavedTasks();
+        tasks.push(task);
+        localStorage.setItem('dailySchedule', JSON.stringify(tasks));
+        return;
+    }
+    
+    // Use auth system to save task
+    const currentTasks = window.authSystem.getCurrentUserTasks();
+    currentTasks.push(task);
+    window.authSystem.saveCurrentUserTasks(currentTasks);
 }
 
 function getSavedTasks() {
-    return JSON.parse(localStorage.getItem('dailySchedule')) || [];
+    if (!window.authSystem || !window.authSystem.currentUser) {
+        // Fallback to localStorage if auth system not available
+        return JSON.parse(localStorage.getItem('dailySchedule')) || [];
+    }
+    
+    // Use auth system to get tasks
+    return window.authSystem.getCurrentUserTasks();
 }
 
 function loadTasks() {
@@ -214,8 +225,16 @@ function loadTasks() {
 
 function deleteTask(taskId) {
     if (confirm('Are you sure you want to delete this task?')) {
-        const tasks = getSavedTasks().filter(task => task.id !== taskId);
-        localStorage.setItem('dailySchedule', JSON.stringify(tasks));
+        if (!window.authSystem || !window.authSystem.currentUser) {
+            // Fallback to localStorage if auth system not available
+            const tasks = getSavedTasks().filter(task => task.id !== taskId);
+            localStorage.setItem('dailySchedule', JSON.stringify(tasks));
+        } else {
+            // Use auth system to delete task
+            const currentTasks = window.authSystem.getCurrentUserTasks();
+            const updatedTasks = currentTasks.filter(task => task.id !== taskId);
+            window.authSystem.saveCurrentUserTasks(updatedTasks);
+        }
         
         const taskElement = document.querySelector(`[data-task-id="${taskId}"]`);
         if (taskElement) {
@@ -233,89 +252,16 @@ function deleteTask(taskId) {
 }
 
 function editTask(taskId) {
-    const tasks = getSavedTasks();
+    let tasks;
+    if (!window.authSystem || !window.authSystem.currentUser) {
+        tasks = getSavedTasks();
+    } else {
+        tasks = window.authSystem.getCurrentUserTasks();
+    }
+    
     const task = tasks.find(t => t.id === taskId);
     
     if (task) {
         const newText = prompt('Edit your task:', task.text);
         if (newText !== null && newText.trim() !== '') {
-            task.text = newText.trim();
-            localStorage.setItem('dailySchedule', JSON.stringify(tasks));
-            
-            // Refresh display
-            document.querySelector('.time-slots').innerHTML = '';
-            generateTimeSlots();
-            loadTasks();
-            updateStatistics();
-            
-            showToast('Task updated!', 'success');
-        }
-    }
-}
-
-function clearAllTasks() {
-    if (confirm('Are you sure you want to clear all tasks? This cannot be undone.')) {
-        localStorage.removeItem('dailySchedule');
-        document.querySelector('.time-slots').innerHTML = '';
-        generateTimeSlots();
-        updateStatistics();
-        showToast('All tasks cleared', 'info');
-    }
-}
-
-function updateStatistics() {
-    const tasks = getSavedTasks();
-    const totalTasks = tasks.length;
-    const totalHours = tasks.reduce((sum, task) => sum + (task.duration / 60), 0);
-    const productivityScore = Math.min(100, Math.round((totalTasks / 8) * 100));
-    
-    document.getElementById('total-tasks').textContent = totalTasks;
-    document.getElementById('total-hours').textContent = totalHours.toFixed(1);
-    document.getElementById('productivity-score').textContent = `${productivityScore}%`;
-}
-
-// Utility function to show toast notifications
-function showToast(message, type = 'info') {
-    // Remove existing toasts
-    const existingToasts = document.querySelectorAll('.toast');
-    existingToasts.forEach(toast => toast.remove());
-    
-    // Create new toast
-    const toast = document.createElement('div');
-    toast.className = `toast toast-${type}`;
-    toast.textContent = message;
-    
-    document.body.appendChild(toast);
-    
-    // Remove toast after 3 seconds
-    setTimeout(() => {
-        toast.style.animation = 'slideOut 0.3s ease';
-        setTimeout(() => {
-            if (toast.parentNode) {
-                toast.parentNode.removeChild(toast);
-            }
-        }, 300);
-    }, 3000);
-}
-
-// Handle online/offline status
-window.addEventListener('online', () => {
-    showToast('Connection restored', 'success');
-});
-
-window.addEventListener('offline', () => {
-    showToast('You are currently offline', 'warning');
-});
-
-// Hide loading screen when everything is loaded
-window.addEventListener('load', () => {
-    setTimeout(() => {
-        const loadingScreen = document.getElementById('app-loading');
-        if (loadingScreen) {
-            loadingScreen.style.opacity = '0';
-            setTimeout(() => {
-                loadingScreen.classList.add('hidden');
-            }, 500);
-        }
-    }, 1000);
-});
+           
