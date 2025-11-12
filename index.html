@@ -6,129 +6,66 @@
     <title>Dark Schedule Planner - Build Better Discipline</title>
     <link rel="stylesheet" href="style.css">
     
-    <!-- === PWA META TAGS === -->
+    <!-- PWA Meta Tags -->
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#0f172a">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="Schedule Planner">
-    <link rel="apple-touch-icon" href="icons/icon-192.png">
-    <meta name="msapplication-TileColor" content="#0f172a">
-    <meta name="msapplication-TileImage" content="icons/icon-144.png">
-    <meta name="format-detection" content="telephone=no">
-    <meta name="mobile-web-app-capable" content="yes">
-    
-    <!-- Dark mode meta tags -->
-    <meta name="color-scheme" content="dark">
-    <meta name="supported-color-schemes" content="dark">
 </head>
 <body>
     <!-- Loading Screen -->
     <div id="app-loading">
         <div class="loading-content">
             <div class="loading-spinner"></div>
-            <p>Loading Dark Schedule Planner...</p>
+            <p>Loading Schedule Planner...</p>
         </div>
     </div>
 
-    <!-- Auth Screens -->
-    <div id="auth-container" class="auth-container hidden">
-        <!-- Login Screen -->
-        <div id="login-screen" class="auth-screen">
-            <div class="auth-card">
-                <div class="auth-header">
-                    <h1>🌙 Welcome Back</h1>
-                    <p>Sign in to your schedule planner</p>
-                </div>
-                
-                <form id="login-form" class="auth-form">
-                    <div class="input-group">
-                        <label for="login-email">Email</label>
-                        <input type="email" id="login-email" placeholder="Enter your email" required>
-                    </div>
-                    
-                    <div class="input-group">
-                        <label for="login-password">Password</label>
-                        <input type="password" id="login-password" placeholder="Enter your password" required>
-                        <button type="button" class="toggle-password" data-target="login-password">👁️</button>
-                    </div>
-                    
-                    <button type="submit" class="btn-primary auth-btn">Sign In</button>
-                </form>
-                
-                <div class="auth-footer">
-                    <p>Don't have an account? <a href="#" id="show-signup">Sign up</a></p>
-                    <div class="demo-accounts">
-                        <p class="demo-title">Demo Accounts:</p>
-                        <div class="demo-buttons">
-                            <button class="demo-btn" data-email="user@demo.com" data-password="demo123">User Demo</button>
-                            <button class="demo-btn" data-email="test@demo.com" data-password="test123">Test Demo</button>
-                        </div>
-                    </div>
-                </div>
+    <!-- Auth Container -->
+    <div id="auth-container" class="auth-container">
+        <div class="auth-card">
+            <div class="auth-header">
+                <h1>🌙 Schedule Planner</h1>
+                <p>Sign in to start planning your day</p>
             </div>
-        </div>
-
-        <!-- Signup Screen -->
-        <div id="signup-screen" class="auth-screen hidden">
-            <div class="auth-card">
-                <div class="auth-header">
-                    <h1>🚀 Get Started</h1>
-                    <p>Create your schedule planner account</p>
+            
+            <!-- Login Form -->
+            <form id="login-form" class="auth-form">
+                <div class="input-group">
+                    <input type="email" id="login-email" placeholder="Email address" required>
                 </div>
                 
-                <form id="signup-form" class="auth-form">
-                    <div class="input-group">
-                        <label for="signup-name">Full Name</label>
-                        <input type="text" id="signup-name" placeholder="Enter your full name" required>
-                    </div>
-                    
-                    <div class="input-group">
-                        <label for="signup-email">Email</label>
-                        <input type="email" id="signup-email" placeholder="Enter your email" required>
-                    </div>
-                    
-                    <div class="input-group">
-                        <label for="signup-password">Password</label>
-                        <input type="password" id="signup-password" placeholder="Create a password" required minlength="6">
-                        <button type="button" class="toggle-password" data-target="signup-password">👁️</button>
-                    </div>
-                    
-                    <div class="input-group">
-                        <label for="signup-confirm-password">Confirm Password</label>
-                        <input type="password" id="signup-confirm-password" placeholder="Confirm your password" required>
-                        <button type="button" class="toggle-password" data-target="signup-confirm-password">👁️</button>
-                    </div>
-                    
-                    <div class="terms-group">
-                        <input type="checkbox" id="signup-terms" required>
-                        <label for="signup-terms">I agree to the <a href="#" class="terms-link">Terms of Service</a> and <a href="#" class="terms-link">Privacy Policy</a></label>
-                    </div>
-                    
-                    <button type="submit" class="btn-primary auth-btn">Create Account</button>
-                </form>
+                <div class="input-group">
+                    <input type="password" id="login-password" placeholder="Password" required>
+                </div>
                 
-                <div class="auth-footer">
-                    <p>Already have an account? <a href="#" id="show-login">Sign in</a></p>
+                <button type="submit" class="btn-primary auth-btn">Sign In</button>
+            </form>
+            
+            <div class="auth-footer">
+                <p>Don't have an account? <a href="#" id="show-signup">Sign up</a></p>
+                
+                <div class="demo-section">
+                    <p class="demo-title">Quick Demo:</p>
+                    <button class="demo-btn" data-email="demo@user.com" data-password="demo123">
+                        Use Demo Account
+                    </button>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Main App (shown after login) -->
+    <!-- Main App (Hidden by default) -->
     <div id="main-app" class="main-app hidden">
         <div class="container">
             <header>
                 <div class="header-content">
                     <div class="user-info">
-                        <h1>🌙 Dark Schedule Planner</h1>
+                        <h1>🌙 Schedule Planner</h1>
                         <p>Welcome, <span id="user-name">User</span>!</p>
                     </div>
                     <div class="header-actions">
-                        <button id="theme-toggle" class="theme-toggle" title="Toggle theme">
-                            <span class="theme-icon">🌞</span>
-                        </button>
-                        <button id="logout-btn" class="logout-btn" title="Logout">🚪</button>
+                        <button id="logout-btn" class="logout-btn" title="Logout">🚪 Logout</button>
                     </div>
                 </div>
             </header>
@@ -183,24 +120,158 @@
             </div>
         </div>
 
-        <!-- Install Prompt -->
-        <div id="install-prompt" class="install-prompt hidden">
-            <div class="install-content">
-                <p>📱 Install Dark Schedule Planner?</p>
-                <div class="install-buttons">
-                    <button id="install-btn" class="btn-primary">Install</button>
-                    <button id="cancel-install" class="btn-secondary">Not Now</button>
-                </div>
-            </div>
-        </div>
-
         <footer>
             <p>Plan your day, shape your life. Stay disciplined! 💪</p>
         </footer>
     </div>
 
-    <script src="auth.js"></script>
+    <script>
+        // Simple Auth System - Put this directly in HTML to avoid module issues
+        class SimpleAuth {
+            constructor() {
+                this.users = JSON.parse(localStorage.getItem('scheduleUsers')) || [];
+                this.currentUser = JSON.parse(localStorage.getItem('currentUser')) || null;
+                this.init();
+            }
+
+            init() {
+                this.setupEventListeners();
+                this.checkAuthStatus();
+            }
+
+            setupEventListeners() {
+                // Login form
+                document.getElementById('login-form').addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    this.handleLogin();
+                });
+
+                // Demo button
+                document.querySelector('.demo-btn').addEventListener('click', () => {
+                    this.fillDemoCredentials();
+                });
+
+                // Show signup
+                document.getElementById('show-signup').addEventListener('click', (e) => {
+                    e.preventDefault();
+                    this.handleSignup();
+                });
+
+                // Logout
+                document.getElementById('logout-btn').addEventListener('click', () => {
+                    this.handleLogout();
+                });
+            }
+
+            checkAuthStatus() {
+                if (this.currentUser) {
+                    this.showMainApp();
+                } else {
+                    this.showAuth();
+                }
+                
+                // Hide loading screen
+                setTimeout(() => {
+                    document.getElementById('app-loading').classList.add('hidden');
+                }, 1000);
+            }
+
+            showAuth() {
+                document.getElementById('auth-container').classList.remove('hidden');
+                document.getElementById('main-app').classList.add('hidden');
+            }
+
+            showMainApp() {
+                document.getElementById('auth-container').classList.add('hidden');
+                document.getElementById('main-app').classList.remove('hidden');
+                document.getElementById('user-name').textContent = this.currentUser?.name || 'User';
+                
+                // Initialize the main app
+                if (typeof initializeApp === 'function') {
+                    initializeApp();
+                }
+            }
+
+            handleLogin() {
+                const email = document.getElementById('login-email').value.trim();
+                const password = document.getElementById('login-password').value;
+
+                if (!email || !password) {
+                    this.showMessage('Please fill in all fields', 'error');
+                    return;
+                }
+
+                const user = this.users.find(u => u.email === email && u.password === password);
+                
+                if (user) {
+                    this.currentUser = user;
+                    localStorage.setItem('currentUser', JSON.stringify(user));
+                    this.showMainApp();
+                    this.showMessage(`Welcome back, ${user.name}!`, 'success');
+                } else {
+                    this.showMessage('Invalid email or password', 'error');
+                }
+            }
+
+            handleSignup() {
+                // For now, just create a demo account
+                const demoUser = {
+                    id: Date.now().toString(),
+                    name: 'New User',
+                    email: 'new@user.com',
+                    password: 'password123',
+                    createdAt: new Date().toISOString()
+                };
+
+                this.users.push(demoUser);
+                localStorage.setItem('scheduleUsers', JSON.stringify(this.users));
+
+                this.currentUser = demoUser;
+                localStorage.setItem('currentUser', JSON.stringify(demoUser));
+                this.showMainApp();
+                this.showMessage('Account created! Welcome!', 'success');
+            }
+
+            fillDemoCredentials() {
+                // Create demo user if doesn't exist
+                const demoUser = {
+                    id: 'demo',
+                    name: 'Demo User',
+                    email: 'demo@user.com',
+                    password: 'demo123',
+                    createdAt: new Date().toISOString()
+                };
+
+                if (!this.users.find(u => u.email === demoUser.email)) {
+                    this.users.push(demoUser);
+                    localStorage.setItem('scheduleUsers', JSON.stringify(this.users));
+                }
+
+                document.getElementById('login-email').value = 'demo@user.com';
+                document.getElementById('login-password').value = 'demo123';
+                this.showMessage('Demo credentials filled! Click Sign In.', 'info');
+            }
+
+            handleLogout() {
+                if (confirm('Are you sure you want to logout?')) {
+                    this.currentUser = null;
+                    localStorage.removeItem('currentUser');
+                    this.showAuth();
+                    this.showMessage('You have been logged out', 'info');
+                }
+            }
+
+            showMessage(message, type) {
+                alert(message); // Simple alert for now
+            }
+        }
+
+        // Initialize auth when page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            window.simpleAuth = new SimpleAuth();
+        });
+    </script>
+
     <script src="script.js"></script>
-    <script src="pwa.js"></script>
 </body>
 </html>
