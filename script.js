@@ -4,6 +4,9 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 function initializeApp() {
+    // Initialize theme
+    initializeTheme();
+    
     // Set current date
     document.getElementById('current-date').textContent = getCurrentDate();
     
@@ -21,11 +24,50 @@ function initializeApp() {
         if (e.key === 'Enter') addTask();
     });
     
+    // Theme toggle
+    document.getElementById('theme-toggle').addEventListener('click', toggleTheme);
+    
     // Mobile-friendly touch improvements
     setupTouchInteractions();
     
     // Update statistics
     updateStatistics();
+}
+
+// Theme Management
+function initializeTheme() {
+    const savedTheme = localStorage.getItem('theme') || 'dark';
+    setTheme(savedTheme);
+}
+
+function setTheme(theme) {
+    document.documentElement.setAttribute('data-theme', theme);
+    localStorage.setItem('theme', theme);
+    
+    // Update theme toggle icon
+    const themeIcon = document.querySelector('.theme-icon');
+    if (themeIcon) {
+        themeIcon.textContent = theme === 'dark' ? '🌞' : '🌙';
+    }
+    
+    // Update manifest theme color
+    updateThemeColor(theme);
+}
+
+function toggleTheme() {
+    const currentTheme = document.documentElement.getAttribute('data-theme') || 'dark';
+    const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+    setTheme(newTheme);
+    
+    showToast(`Switched to ${newTheme} theme`, 'info');
+}
+
+function updateThemeColor(theme) {
+    const themeColor = theme === 'dark' ? '#0f172a' : '#ffffff';
+    const metaThemeColor = document.querySelector('meta[name="theme-color"]');
+    if (metaThemeColor) {
+        metaThemeColor.setAttribute('content', themeColor);
+    }
 }
 
 function setupTouchInteractions() {
